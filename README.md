@@ -27,6 +27,8 @@ Possible options are:
                         has to be a string with comma separated values.
                         e.g. --legend 'Plot 1, Plot 2, Plot 3'
   --legloc              specify the legend location, default: 'best'
+  --mplstyle            use mpl style file
+                        e.g. --mplstyle 'style1'
   -d                    copy rptscript to folder, for extended modification
   -h, --help            print this help message
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

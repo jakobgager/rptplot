@@ -22,7 +22,7 @@ Possible options are:
   --ylim                set ylim as 'min,max'
   --size                set figure size
   -l                    set default legend (based on file name)
-  -g, --nogrid          set no grid
+  -g, --grid            set grid
   -p, --pdf             writes pdf instead of screen output
   -s, --scalefactor     set a scale factor for each argument
                         has to be a string with comma separated values.
@@ -38,6 +38,8 @@ Possible options are:
                         has to be a string with comma separated values.
                         e.g. --legend 'Plot 1, Plot 2, Plot 3'
   --legloc              specify the legend location, default: 'best'
+  --mplstyle            use mpltools stylefile
+                        e.g. --mplstyle 'style1'
   -d                    copy rptscript to folder, for extended modification
   -h, --help            print this help message
 
@@ -64,7 +66,7 @@ def raw_string(s):
 ############################################################
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift="]) 
+    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "mplstyle="]) 
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -85,13 +87,20 @@ xl, yl = [], []
 lw = [1]*len(args)
 xshift=[0]*len(args)
 
+# specify mpltools style files - has to be done in advance
+for o, a  in opts:
+    if '--mplstyle' in o:
+        from mpltools import style as mplstyle
+        mplstyle.use(a)
+
 # create plot figure with default options
-fig = plt.figure(1,(11.5,8.3))
+#fig = plt.figure(1,(11.5,8.3))
+fig = plt.figure(1)
 #ax1 = plt.axes([0.10,0.10,0.8,0.8])
 ax1 = fig.add_subplot(111)
 plt.xlabel("Displacement")
 plt.ylabel("Force")
-plt.grid(True)
+#plt.grid(True)
 
 # use arguments
 for o, a  in opts:
@@ -106,7 +115,7 @@ for o, a  in opts:
         plt.ylabel(a)
     # set grid flag
     elif o in ('-g','--nogrid'): 
-        plt.grid(False)
+        plt.grid(True)
     # check pdf flag
     elif o in ('-p','--pdf'): 
         pdf = True
