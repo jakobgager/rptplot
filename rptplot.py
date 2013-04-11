@@ -234,7 +234,8 @@ for o, a  in opts:
     elif o == '--legend': 
         ls = True
         ll = a.split(',')
-        ll = map(raw_string,ll)
+        # creates problems with mathtext
+        #ll = map(raw_string,ll)
         if len(ll)>=len(args):
             pass
         else:
@@ -301,7 +302,7 @@ for i, arg in enumerate(args):
         # visualize dots the graph   
 
         #create dummy data for legend
-        plt.plot(data[:,0][0]*sl[i]+xshift[i],data[:,1][0]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None')
+        plt.plot(data[:,0][0]*sl[i]+xshift[i],data[:,1][0]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None', mew=1.)
 
         meanxs=[]; meanys=[]
         n=0
@@ -324,13 +325,13 @@ for i, arg in enumerate(args):
 
         plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], marker='', lw=lw[i])
         data = np.hstack((np.array(meanxs)[:,np.newaxis],np.array(meanys)[:,np.newaxis]))
-        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], linestyle='', mfc='None')
+        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], linestyle='', mfc='None', mew=1.)
 
     else:
         if len(style) == 0:
             plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], label=ll[i], lw=lw[i])
         else:
-            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None')
+            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None', mew=1.)
 
 if ls == True:
     plt.legend(loc= legloc)
