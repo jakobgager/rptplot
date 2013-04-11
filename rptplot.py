@@ -32,10 +32,11 @@ Possible options are:
   --scalenoiso          scale non-isotropic, additional scalefactor for y values
   --xshift              shift data in x for each argument
   --yshift              shift data in y for each argument
+  --scaleall            apply given transformation to all datasets
   --style               set the style for every argument
                         e.g. --style '-k, --g, :r'
   -a                    creates markers with a given distance for each argument
-  -b, --lw              set linewidth for each argument
+  --lw                  set linewidth for each argument
   -n                    skip non-isotropic note
   -c                    set clipping of lines and markers OFF
   --legend              set a legend entry for each argument
@@ -43,6 +44,7 @@ Possible options are:
                         If None is specified no legend is plotted for this dataset.
                         e.g. --legend 'Plot 1, Plot 2, Plot 3'
   --legloc              specify the legend location, default: 'best'
+  --baseaxis            plot origin axis
   --mplstyle            use mpltools stylefile
                         e.g. --mplstyle 'style1'
   -d                    copy rptscript to folder, for extended modification
@@ -71,7 +73,7 @@ def raw_string(s):
 ############################################################
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:c", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "yshift=", "mplstyle=", "axis="]) 
+    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:c", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "yshift=", "mplstyle=", "axis=", "scaleall", "baseaxis"]) 
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -91,14 +93,19 @@ clip = True
 smooth = [False]*len(args)
 xl, yl = [], []
 lw = [1]*len(args)
-xshift=[0]*len(args)
-yshift=[0]*len(args)
+xshift = [0]*len(args)
+yshift = [0]*len(args)
+scall = False
+ba = False
 
 # specify mpltools style files - has to be done in advance
 for o, a  in opts:
     if '--mplstyle' in o:
         from mpltools import style as mplstyle
         mplstyle.use(a)
+    elif '--scaleall' in o:
+        scall = True
+        print 'Scale All active!'
 
 # create plot figure with default options
 #fig = plt.figure(1,(11.5,8.3))
@@ -129,6 +136,9 @@ for o, a  in opts:
     # check clipping flag
     elif o in ('-c'):
         clip = False
+    # check origin axis flag
+    elif o in ('--baseaxis'):
+        ba = True
     # check and set xlim
     elif o in ('--xlim'): 
         xl = [float(i) for i in a.split(',')]
@@ -155,11 +165,14 @@ for o, a  in opts:
         if len(sl)>=len(args):
             pass
         else:
-            sl += [1.0]*(len(args)-len(sl))
-            print 'Check number of entries!'
-            print 'Scalefactor of 1 is used for non defined'
-            print 'Arguments: ' + str(args)
-            print 'Scalefactors: ' + str(sl)
+            if len(sl) > 0 and scall:
+                sl = [sl[0]]*len(args)
+            else:
+                sl += [1.0]*(len(args)-len(sl))
+                print 'Check number of entries!'
+                print 'Scalefactor of 1 is used for non defined'
+                print 'Arguments: ' + str(args)
+                print 'Scalefactors: ' + str(sl)
             #usage()
             #sys.exit(2)
     # check and set scalefactor for non isotropic
@@ -168,11 +181,14 @@ for o, a  in opts:
         if len(sln)>=len(args):
             pass
         else:
-            sln += [1.0]*(len(args)-len(sln))
-            print 'Check number of entries!'
-            print 'Scalefactor of 1 is used for non defined'
-            print 'Arguments: ' + str(args)
-            print 'Non isotropic scalefactors: ' + str(sln)
+            if len(sln) > 0 and scall:
+                sln = [sln[0]]*len(args)
+            else:
+                sln += [1.0]*(len(args)-len(sln))
+                print 'Check number of entries!'
+                print 'Scalefactor of 1 is used for non defined'
+                print 'Arguments: ' + str(args)
+                print 'Non isotropic scalefactors: ' + str(sln)
             #usage()
             #sys.exit(2)
     # check and set x shift
@@ -181,22 +197,28 @@ for o, a  in opts:
         if len(xshift)>=len(args):
             pass
         else:
-            xshift = [0]*len(args)
-            print 'Check number of entries!'
-            print 'Zero x-shift is used for all data'
-            print 'Arguments: ' + str(args)
-            print 'X shift values: ' + str(sln)
+            if len(xshift) > 0 and scall:
+                xshift = [xshift[0]]*len(args)
+            else:
+                xshift = [0]*len(args)
+                print 'Check number of entries!'
+                print 'Zero x-shift is used for all data'
+                print 'Arguments: ' + str(args)
+                print 'X shift values: ' + str(sln)
     # check and set y shift
     elif o in ('--yshift'): 
         yshift = [float(i) for i in a.split(',')]
         if len(yshift)>=len(args):
             pass
         else:
-            yshift = [0]*len(args)
-            print 'Check number of entries!'
-            print 'Zero y-shift is used for all data'
-            print 'Arguments: ' + str(args)
-            print 'Y shift values: ' + str(sln)
+            if len(yshift) > 0 and scall:
+                yshift = [yshift[0]]*len(args)
+            else:
+                yshift = [0]*len(args)
+                print 'Check number of entries!'
+                print 'Zero y-shift is used for all data'
+                print 'Arguments: ' + str(args)
+                print 'Y shift values: ' + str(sln)
     # set no non-isotropic note flag
     elif o == '-n': 
         n = True
@@ -217,7 +239,7 @@ for o, a  in opts:
             #usage()
             #sys.exit(2)
     # set line widths
-    elif o in ('--lw','-b'): 
+    elif o in ('--lw'): 
         lw = map(float,a.split(','))
         if len(lw)>=len(args):
             pass
@@ -361,7 +383,12 @@ if len(yl)==2:
 if not clip:
     for ob in ax1.lines:
         ob.set_clip_on(False)
-
+#base axis
+if ba:
+    plt.autoscale(False)
+    plt.plot([-10000,10000],[0,0],'k-', lw=0.5, label=None)
+    plt.plot([0,0],[-10000,10000],'k-', lw=0.5, label=None)
+    
 # show plot or write pdf
 if pdf:
     plt.savefig('RPToutput.pdf')
