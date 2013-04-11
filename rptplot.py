@@ -31,6 +31,7 @@ Possible options are:
                         e.g. -s '1.4, 4, 10'
   --scalenoiso          scale non-isotropic, additional scalefactor for y values
   --xshift              shift data in x for each argument
+  --yshift              shift data in y for each argument
   --style               set the style for every argument
                         e.g. --style '-k, --g, :r'
   -a                    creates markers with a given distance for each argument
@@ -39,6 +40,7 @@ Possible options are:
   -c                    set clipping of lines and markers OFF
   --legend              set a legend entry for each argument
                         has to be a string with comma separated values.
+                        If None is specified no legend is plotted for this dataset.
                         e.g. --legend 'Plot 1, Plot 2, Plot 3'
   --legloc              specify the legend location, default: 'best'
   --mplstyle            use mpltools stylefile
@@ -69,7 +71,7 @@ def raw_string(s):
 ############################################################
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:c", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "mplstyle=", "axis="]) 
+    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:c", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "yshift=", "mplstyle=", "axis="]) 
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -90,6 +92,7 @@ smooth = [False]*len(args)
 xl, yl = [], []
 lw = [1]*len(args)
 xshift=[0]*len(args)
+yshift=[0]*len(args)
 
 # specify mpltools style files - has to be done in advance
 for o, a  in opts:
@@ -183,6 +186,17 @@ for o, a  in opts:
             print 'Zero x-shift is used for all data'
             print 'Arguments: ' + str(args)
             print 'X shift values: ' + str(sln)
+    # check and set y shift
+    elif o in ('--yshift'): 
+        yshift = [float(i) for i in a.split(',')]
+        if len(yshift)>=len(args):
+            pass
+        else:
+            yshift = [0]*len(args)
+            print 'Check number of entries!'
+            print 'Zero y-shift is used for all data'
+            print 'Arguments: ' + str(args)
+            print 'Y shift values: ' + str(sln)
     # set no non-isotropic note flag
     elif o == '-n': 
         n = True
@@ -236,6 +250,8 @@ for o, a  in opts:
         ll = a.split(',')
         # creates problems with mathtext
         #ll = map(raw_string,ll)
+        for leg in range(len(ll)):
+            if ll[leg]=='None': ll[leg]=None
         if len(ll)>=len(args):
             pass
         else:
@@ -302,7 +318,7 @@ for i, arg in enumerate(args):
         # visualize dots the graph   
 
         #create dummy data for legend
-        plt.plot(data[:,0][0]*sl[i]+xshift[i],data[:,1][0]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None', mew=1.)
+        plt.plot(data[:,0][0]*sl[i]+xshift[i],data[:,1][0]*sl[i]*sln[i]+yshift[i], style[i], label=ll[i], lw=lw[i], mfc='None', mew=1.)
 
         meanxs=[]; meanys=[]
         n=0
@@ -323,15 +339,15 @@ for i, arg in enumerate(args):
         meanxs.append(xv[n])
         meanys.append(yv[n])
 
-        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], marker='', lw=lw[i])
+        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i]+yshift[i], style[i], marker='', lw=lw[i])
         data = np.hstack((np.array(meanxs)[:,np.newaxis],np.array(meanys)[:,np.newaxis]))
-        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], linestyle='', mfc='None', mew=1.)
+        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i]+yshift[i], style[i], linestyle='', mfc='None', mew=1.)
 
     else:
         if len(style) == 0:
-            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], label=ll[i], lw=lw[i])
+            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i]+yshift[i], label=ll[i], lw=lw[i])
         else:
-            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None', mew=1.)
+            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i]+yshift[i], style[i], label=ll[i], lw=lw[i], mfc='None', mew=1.)
 
 if ls == True:
     plt.legend(loc= legloc)
