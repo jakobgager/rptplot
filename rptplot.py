@@ -21,6 +21,8 @@ Possible options are:
   --xlim                set xlim as 'min,max'
   --ylim                set ylim as 'min,max'
   --size                set figure size
+  --axis                set axis dimensions 
+                        (left, bottom, right, top)
   -l                    set default legend (based on file name)
   -g, --grid            set grid
   -p, --pdf             writes pdf instead of screen output
@@ -34,6 +36,7 @@ Possible options are:
   -a                    creates markers with a given distance for each argument
   -b, --lw              set linewidth for each argument
   -n                    skip non-isotropic note
+  -c                    set clipping of lines and markers OFF
   --legend              set a legend entry for each argument
                         has to be a string with comma separated values.
                         e.g. --legend 'Plot 1, Plot 2, Plot 3'
@@ -66,7 +69,7 @@ def raw_string(s):
 ############################################################
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "mplstyle="]) 
+    opts, args = getopt.getopt(sys.argv[1:], "ht:s:x:y:glpnda:b:c", ["help", "title=","scalefactor=", "xlabel=", "ylabel=", "nogrid", "legend=", "pdf", "scalenoiso=", "style=", "legloc=", "xlim=", "ylim=", "lw=","size=", "xshift=", "mplstyle=", "axis="]) 
 except getopt.GetoptError, err:
     print str(err)
     usage()
@@ -82,6 +85,7 @@ legloc='best'
 pdf = False
 style=[]
 n = False
+clip = True
 smooth = [False]*len(args)
 xl, yl = [], []
 lw = [1]*len(args)
@@ -119,6 +123,9 @@ for o, a  in opts:
     # check pdf flag
     elif o in ('-p','--pdf'): 
         pdf = True
+    # check clipping flag
+    elif o in ('-c'):
+        clip = False
     # check and set xlim
     elif o in ('--xlim'): 
         xl = [float(i) for i in a.split(',')]
@@ -218,6 +225,11 @@ for o, a  in opts:
             print 'Default fiure size is used'
             #usage()
             #sys.exit(2)
+    # set axis dimensions
+    elif o == '--axis':
+        dims = map(float,a.split(','))
+        fig.subplots_adjust(*dims)
+
     # check and set customized legend
     elif o == '--legend': 
         ls = True
@@ -262,6 +274,10 @@ for o, a  in opts:
         usage()
         sys.exit(2)
 
+#check if axis has been defined:
+if ax1 == None:
+    ax1 = fig.add_subplot(111)
+
 # set title
 if (np.array(sln)!=1).any() and not n:
     ti=ax1.get_title()
@@ -285,7 +301,7 @@ for i, arg in enumerate(args):
         # visualize dots the graph   
 
         #create dummy data for legend
-        plt.plot(data[:,0][0]*sl[i]+xshift[i],data[:,1][0]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i])
+        plt.plot(data[:,0][0]*sl[i]+xshift[i],data[:,1][0]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None')
 
         meanxs=[]; meanys=[]
         n=0
@@ -308,13 +324,13 @@ for i, arg in enumerate(args):
 
         plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], marker='', lw=lw[i])
         data = np.hstack((np.array(meanxs)[:,np.newaxis],np.array(meanys)[:,np.newaxis]))
-        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], linestyle='')
+        plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], linestyle='', mfc='None')
 
     else:
         if len(style) == 0:
             plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], label=ll[i], lw=lw[i])
         else:
-            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i])
+            plt.plot(data[:,0]*sl[i]+xshift[i],data[:,1]*sl[i]*sln[i], style[i], label=ll[i], lw=lw[i], mfc='None')
 
 if ls == True:
     plt.legend(loc= legloc)
@@ -324,6 +340,10 @@ if len(xl)==2:
 
 if len(yl)==2:
     plt.ylim(yl)
+
+if not clip:
+    for ob in ax1.lines:
+        ob.set_clip_on(False)
 
 # show plot or write pdf
 if pdf:
