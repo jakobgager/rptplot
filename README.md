@@ -1,5 +1,8 @@
 rpt plotter
 ===========
+Commandline tool to plot space separated files. Currently no
+header lines are permitted.
+
 
 Usage: rptplot [options...] input.rpt input2.rpt ...
 
